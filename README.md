@@ -376,9 +376,9 @@ stream：该类型的记录组成一个由带有空contentData的记录结束的
 {FCGI_PARAMS,          1, ""}
 {FCGI_STDIN,           1, ""}
 
-    {FCGI_STDOUT,      1, "Content-type: text/html\r\n\r\n<html>\n<head> ... "}
-    {FCGI_STDOUT,      1, ""}
-    {FCGI_END_REQUEST, 1, {0, FCGI_REQUEST_COMPLETE}}
+{FCGI_STDOUT,      1, "Content-type: text/html\r\n\r\n<html>\n<head> ... "}
+{FCGI_STDOUT,      1, ""}
+{FCGI_END_REQUEST, 1, {0, FCGI_REQUEST_COMPLETE}}
 2. 类似例1，但这次在stdin有数据。Web服务器选择用比之前更多的FCGI_PARAMS记录发送参数：
 {FCGI_BEGIN_REQUEST,   1, {FCGI_RESPONDER, 0}}
 {FCGI_PARAMS,          1, "\013\002SERVER_PORT80\013\016SER"}
@@ -387,21 +387,21 @@ stream：该类型的记录组成一个由带有空contentData的记录结束的
 {FCGI_STDIN,           1, "quantity=100&item=3047936"}
 {FCGI_STDIN,           1, ""}
 
-    {FCGI_STDOUT,      1, "Content-type: text/html\r\n\r\n<html>\n<head> ... "}
-    {FCGI_STDOUT,      1, ""}
-    {FCGI_END_REQUEST, 1, {0, FCGI_REQUEST_COMPLETE}}
+{FCGI_STDOUT,      1, "Content-type: text/html\r\n\r\n<html>\n<head> ... "}
+{FCGI_STDOUT,      1, ""}
+{FCGI_END_REQUEST, 1, {0, FCGI_REQUEST_COMPLETE}}
 3. 类似例1，但这次应用发现了错误。应用把一条消息记录到stderr，向客户端返回一个页面，并且向Web服务器返回非0退出状态。应用选择用更多FCGI_STDOUT记录发送页面：
 {FCGI_BEGIN_REQUEST,   1, {FCGI_RESPONDER, 0}}
 {FCGI_PARAMS,          1, "\013\002SERVER_PORT80\013\016SERVER_ADDR199.170.183.42 ... "}
 {FCGI_PARAMS,          1, ""}
 {FCGI_STDIN,           1, ""}
 
-    {FCGI_STDOUT,      1, "Content-type: text/html\r\n\r\n<ht"}
-    {FCGI_STDERR,      1, "config error: missing SI_UID\n"}
-    {FCGI_STDOUT,      1, "ml>\n<head> ... "}
-    {FCGI_STDOUT,      1, ""}
-    {FCGI_STDERR,      1, ""}
-    {FCGI_END_REQUEST, 1, {938, FCGI_REQUEST_COMPLETE}}
+{FCGI_STDOUT,      1, "Content-type: text/html\r\n\r\n<ht"}
+{FCGI_STDERR,      1, "config error: missing SI_UID\n"}
+{FCGI_STDOUT,      1, "ml>\n<head> ... "}
+{FCGI_STDOUT,      1, ""}
+{FCGI_STDERR,      1, ""}
+{FCGI_END_REQUEST, 1, {938, FCGI_REQUEST_COMPLETE}}
 4. 在单条线路上多路复用的两个例1实例。第一个请求比第二个难，所以应用颠倒次序完成这些请求：
 {FCGI_BEGIN_REQUEST,   1, {FCGI_RESPONDER, FCGI_KEEP_CONN}}
 {FCGI_PARAMS,          1, "\013\002SERVER_PORT80\013\016SERVER_ADDR199.170.183.42 ... "}
@@ -410,14 +410,14 @@ stream：该类型的记录组成一个由带有空contentData的记录结束的
 {FCGI_PARAMS,          2, "\013\002SERVER_PORT80\013\016SERVER_ADDR199.170.183.42 ... "}
 {FCGI_STDIN,           1, ""}
 
-    {FCGI_STDOUT,      1, "Content-type: text/html\r\n\r\n"}
+{FCGI_STDOUT,      1, "Content-type: text/html\r\n\r\n"}
 
 {FCGI_PARAMS,          2, ""}
 {FCGI_STDIN,           2, ""}
 
-    {FCGI_STDOUT,      2, "Content-type: text/html\r\n\r\n<html>\n<head> ... "}
-    {FCGI_STDOUT,      2, ""}
-    {FCGI_END_REQUEST, 2, {0, FCGI_REQUEST_COMPLETE}}
-    {FCGI_STDOUT,      1, "<html>\n<head> ... "}
-    {FCGI_STDOUT,      1, ""}
-    {FCGI_END_REQUEST, 1, {0, FCGI_REQUEST_COMPLETE}}
+{FCGI_STDOUT,      2, "Content-type: text/html\r\n\r\n<html>\n<head> ... "}
+{FCGI_STDOUT,      2, ""}
+{FCGI_END_REQUEST, 2, {0, FCGI_REQUEST_COMPLETE}}
+{FCGI_STDOUT,      1, "<html>\n<head> ... "}
+{FCGI_STDOUT,      1, ""}
+{FCGI_END_REQUEST, 1, {0, FCGI_REQUEST_COMPLETE}}
