@@ -28,12 +28,14 @@ Web服务器可提供某种方式指定应用的初始进程状态的其他组�
 我们用两个约定来简化我们的定义。
 首先，当两个相邻的结构组件除了后缀“B1”和“B0”之外命名相同时，它表示这两个组件可视为估值为B1<<8 + B0的单个数字。该单个数字的名字是这些组件减去后缀的名字。这个约定归纳了一个由超过两个字节表示的数字的处理方式。
 第二，我们扩展C结构（struct）来允许形式
+```
         struct {
             unsigned char mumbleLengthB1;
             unsigned char mumbleLengthB0;
             ... /* 其他东西 */
             unsigned char mumbleData[mumbleLength];
         };
+```
 表示一个变长结构，此处组件的长度由较早的一个或多个组件指示的值确定。
 ## 3.2 接受传输线路
 FastCGI应用在文件描述符FCGI_LISTENSOCK_FILENO引用的socket上调用accept()来接收新的传输线路。如果accept()成功，而且也绑定了FCGI_WEB_SERVER_ADDRS环境变量，则应用立刻执行下列特殊处理：
@@ -44,6 +46,7 @@ FCGI_WEB_SERVER_ADDRS被表示成逗号分隔的IP地址列表。每个IP地址�
 ## 3.3 记录
 应用利用简单的协议执行来自Web服务器的请求。协议细节依赖应用的角色，但是大致说来，Web服务器首先发送参数和其他数据到应用，然后应用发送结果数据到Web服务器，最后应用向Web服务器发送一个请求完成的指示。
 通过传输线路流动的所有数据在FastCGI记录中运载。FastCGI记录实现两件事。首先，记录在多个独立的FastCGI请求间多路复用传输线路。该多路复用技术支持能够利用事件驱动或多线程编程技术处理并发请求的应用。第二，在单个请求内部，记录在每个方向上提供若干独立的数据流。这种方式，例如，stdout和stderr数据能通过从应用到Web服务器的单个传输线路传递，而不需要独立的管道。
+```
         typedef struct {
             unsigned char version;
             unsigned char type;
@@ -56,6 +59,7 @@ FCGI_WEB_SERVER_ADDRS被表示成逗号分隔的IP地址列表。每个IP地址�
             unsigned char contentData[contentLength];
             unsigned char paddingData[paddingLength];
         } FCGI_Record;
+```
 FastCGI记录由一个定长前缀后跟可变数量的内容和填充字节组成。记录包含七个组件：
 version: 标识FastCGI协议版本。本规范评述（document）FCGI_VERSION_1。
 type: 标识FastCGI记录类型，也就是记录执行的一般职能。特定记录类型和它们的功能在后面部分详细说明。
@@ -81,6 +85,7 @@ Web服务器尝试保持小的FastCGI请求ID。那种方式下应用能利用�
 ## 3.4 名-值对
 FastCGI应用的很多角色需要读写可变数量的可变长度的值。所以为编码名-值对提供标准格式很有用。
 FastCGI以名字长度，后跟值的长度，后跟名字，后跟值的形式传送名-值对。127字节或更少的长度能在一字节中编码，而更长的长度总是在四字节中编码：
+```
         typedef struct {
             unsigned char nameLengthB0;  /* nameLengthB0  >> 7 == 0 */
             unsigned char valueLengthB0; /* valueLengthB0 >> 7 == 0 */
@@ -124,6 +129,7 @@ FastCGI以名字长度，后跟值的长度，后跟名字，后跟值的形式�
             unsigned char valueData[valueLength
                     ((B3 & 0x7f) << 24) + (B2 << 16) + (B1 << 8) + B0];
         } FCGI_NameValuePair44;
+```
 长度的第一字节的高位指示长度的编码方式。高位为0意味着一个字节的编码方式，1意味着四字节的编码方式。
 名-值对格式允许发送者不用额外的编码方式就能传输二进制值，并且允许接收者立刻分配正确数量的内存，即使对于巨大的值。
 ## 3.5 关闭传输线路
@@ -144,21 +150,25 @@ FCGI_MPXS_CONNS：如果应用不多路复用线路（也就是通过每个线�
 ##4.2 FCGI_UNKNOWN_TYPE
 在本协议的未来版本中，管理记录类型集可能会增长。为了这种演变作准备，协议包含FCGI_UNKNOWN_TYPE管理记录。当应用收到无法理解的类型为T的管理记录时，它用{FCGI_UNKNOWN_TYPE, 0, {T}}响应。
 FCGI_UNKNOWN_TYPE记录的contentData组件具有形式：
+```
         typedef struct {
             unsigned char type;    
             unsigned char reserved[7];
         } FCGI_UnknownTypeBody;
+```
 type组件是无法识别的管理记录的类型。
 # 5. 应用（Application）记录类型
 ## 5.1 FCGI_BEGIN_REQUEST
 Web服务器发送FCGI_BEGIN_REQUEST记录开始一个请求。
 FCGI_BEGIN_REQUEST记录的contentData组件具有形式：
+```
         typedef struct {
             unsigned char roleB1;
             unsigned char roleB0;
             unsigned char flags;
             unsigned char reserved[5];
         } FCGI_BeginRequestBody;
+```
 role组件设置Web服务器期望应用扮演的角色。当前定义的角色有：
 FCGI_RESPONDER
 FCGI_AUTHORIZER
@@ -180,6 +190,7 @@ Web服务器发送FCGI_ABORT_REQUEST记录来中止请求。收到{FCGI_ABORT_RE
 ## 5.5 FCGI_END_REQUEST
 不论已经处理了请求，还是已经拒绝了请求，应用发送FCGI_END_REQUEST记录来终止请求。
 FCGI_END_REQUEST记录的contentData组件具有形式：
+```
         typedef struct {
             unsigned char appStatusB3;
             unsigned char appStatusB2;
@@ -188,6 +199,7 @@ FCGI_END_REQUEST记录的contentData组件具有形式：
             unsigned char protocolStatus;
             unsigned char reserved[3];
         } FCGI_EndRequestBody;
+```
 appStatus组件是应用级别的状态码。每种角色说明其appStatus的用法。
 protocolStatus组件是协议级别的状态码；可能的protocolStatus值是：
 FCGI_REQUEST_COMPLETE：请求的正常结束。
@@ -239,6 +251,7 @@ Web服务器能通过向FastCGI应用发送SIGTERM来要求它退出。如果应
 FastCGI应用使用FCGI_STDERR流和FCGI_END_REQUEST记录的appStatus组件报告应用级别错误。在很多情形中，错误会通过FCGI_STDOUT流直接报告给用户。
 在Unix上，应用向syslog报告低级错误，包括FastCGI协议错误和FastCGI环境变量中的语法错误。依赖于错误的严重性，应用可能继续或以非0状态退出。
 # 8. 类型和常量
+```
 /*
  * 正在监听的socket文件编号
  */
@@ -340,6 +353,7 @@ typedef struct {
     FCGI_Header header;
     FCGI_UnknownTypeBody body;
 } FCGI_UnknownTypeRecord;
+```
 # 9. 参考
 National Center for Supercomputer Applications, The Common Gateway Interface, version CGI/1.1.
 D.R.T. Robinson, The WWW Common Gateway Interface Version 1.1, Internet-Draft, 15 February 1996.
@@ -371,7 +385,7 @@ stream：该类型的记录组成一个由带有空contentData的记录结束的
 发送到Web服务器的消息相对于收自Web服务器的消息缩进排版。
 消息以应用经历的时间顺序显示。
 1. 在stdin上不带数据的简单请求，以及成功的响应：
-
+```
 {FCGI_BEGIN_REQUEST,   1, {FCGI_RESPONDER, 0}}
 {FCGI_PARAMS,          1, "\013\002SERVER_PORT80\013\016SERVER_ADDR199.170.183.42 ... "}
 {FCGI_PARAMS,          1, ""}
@@ -380,8 +394,9 @@ stream：该类型的记录组成一个由带有空contentData的记录结束的
 {FCGI_STDOUT,      1, "Content-type: text/html\r\n\r\n<html>\n<head> ... "}
 {FCGI_STDOUT,      1, ""}
 {FCGI_END_REQUEST, 1, {0, FCGI_REQUEST_COMPLETE}}
+```
 2. 类似例1，但这次在stdin有数据。Web服务器选择用比之前更多的FCGI_PARAMS记录发送参数：
-
+```
 {FCGI_BEGIN_REQUEST,   1, {FCGI_RESPONDER, 0}}
 {FCGI_PARAMS,          1, "\013\002SERVER_PORT80\013\016SER"}
 {FCGI_PARAMS,          1, "VER_ADDR199.170.183.42 ... "}
@@ -392,8 +407,9 @@ stream：该类型的记录组成一个由带有空contentData的记录结束的
 {FCGI_STDOUT,      1, "Content-type: text/html\r\n\r\n<html>\n<head> ... "}
 {FCGI_STDOUT,      1, ""}
 {FCGI_END_REQUEST, 1, {0, FCGI_REQUEST_COMPLETE}}
+```
 3. 类似例1，但这次应用发现了错误。应用把一条消息记录到stderr，向客户端返回一个页面，并且向Web服务器返回非0退出状态。应用选择用更多FCGI_STDOUT记录发送页面：
-
+```
 {FCGI_BEGIN_REQUEST,   1, {FCGI_RESPONDER, 0}}
 {FCGI_PARAMS,          1, "\013\002SERVER_PORT80\013\016SERVER_ADDR199.170.183.42 ... "}
 {FCGI_PARAMS,          1, ""}
@@ -405,8 +421,9 @@ stream：该类型的记录组成一个由带有空contentData的记录结束的
 {FCGI_STDOUT,      1, ""}
 {FCGI_STDERR,      1, ""}
 {FCGI_END_REQUEST, 1, {938, FCGI_REQUEST_COMPLETE}}
+```
 4. 在单条线路上多路复用的两个例1实例。第一个请求比第二个难，所以应用颠倒次序完成这些请求：
-
+```
 {FCGI_BEGIN_REQUEST,   1, {FCGI_RESPONDER, FCGI_KEEP_CONN}}
 {FCGI_PARAMS,          1, "\013\002SERVER_PORT80\013\016SERVER_ADDR199.170.183.42 ... "}
 {FCGI_PARAMS,          1, ""}
@@ -425,3 +442,4 @@ stream：该类型的记录组成一个由带有空contentData的记录结束的
 {FCGI_STDOUT,      1, "<html>\n<head> ... "}
 {FCGI_STDOUT,      1, ""}
 {FCGI_END_REQUEST, 1, {0, FCGI_REQUEST_COMPLETE}}
+```
