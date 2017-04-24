@@ -1,6 +1,43 @@
 # fastcgi
 FastCGI规范
 
+
+
+- [fastcgi](#fastcgi)
+- [1. 介绍](#1-)
+- [2. 初始进程状态](#2-)
+    - [2.1 参数表](#21-)
+    - [2.2 文件描述符](#22-)
+    - [2.3 环境变量](#23-)
+    - [2.4 其他状态](#24-)
+- [3. 协议基础](#3-)
+    - [3.1 符号（Notation）](#31-notation)
+    - [3.2 接受传输线路](#32-)
+    - [3.3 记录](#33-)
+    - [3.4 名-值对](#34--)
+    - [3.5 关闭传输线路](#35-)
+- [4. 管理（Management）记录类型](#4-management)
+    - [4.1 FCGI_GET_VALUES, FCGI_GET_VALUES_RESULT](#41-fcgigetvalues-fcgigetvaluesresult)
+    - [4.2 FCGI_UNKNOWN_TYPE](#42-fcgiunknowntype)
+- [5. 应用（Application）记录类型](#5-application)
+    - [5.1 FCGI_BEGIN_REQUEST](#51-fcgibeginrequest)
+    - [5.2 名-值对流：FCGI_PARAMS](#52--fcgiparams)
+    - [5.3 字节流：FCGI_STDIN, FCGI_DATA, FCGI_STDOUT, FCGI_STDERR](#53-fcgistdin-fcgidata-fcgistdout-fcgistderr)
+    - [5.4 FCGI_ABORT_REQUEST](#54-fcgiabortrequest)
+    - [5.5 FCGI_END_REQUEST](#55-fcgiendrequest)
+- [6. 角色](#6-)
+    - [6.1 角色协议](#61-)
+    - [6.2 响应器（Responder）](#62-responder)
+    - [6.3 认证器（Authorizer）](#63-authorizer)
+    - [6.4 过滤器（Filter）](#64-filter)
+- [7. 错误](#7-)
+- [8. 类型和常量](#8-)
+
+- [9. 参考](#9-)
+- [A. 表：记录类型的属性](#a-)
+- [B. 典型的协议消息流程](#b-)
+
+
 # 1. 介绍
 FastCGI是对CGI的开放的扩展，它为所有因特网应用提供高性能，且没有Web服务器API的缺点（penalty）。  
 本规范具有有限的（narrow）目标：从应用的视角规定FastCGI应用和支持FastCGI的Web服务器之间的接口。Web服务器的很多特性涉及FastCGI，举例来说，应用管理设施与应用到Web服务器的接口无关，因此不在这儿描述。  
@@ -453,3 +490,6 @@ D.R.T. Robinson, The WWW Common Gateway Interface Version 1.1, Internet-Draft, 1
 {FCGI_STDOUT,      1, ""}
 {FCGI_END_REQUEST, 1, {0, FCGI_REQUEST_COMPLETE}}
 ```
+
+
+
